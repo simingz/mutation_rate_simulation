@@ -68,6 +68,7 @@ Here, green is the real parameter and data. red is the esitmated mean by smash.
 We use 20kb window size around region chr20, 63400000.
 
 ```{r 20kb}
-
+dat <- read.table("table.ASCWGS_20180504.WGS1902_hg19_controls_SNV_remove_recurrent_mutation.20kwindow.csv")
+dat0 <- dat[dat$chr=="chr20" & dat$start < 63400000 , ]
 
 ```

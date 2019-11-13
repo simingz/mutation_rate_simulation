@@ -25,12 +25,11 @@ myboxplot <- function(form, data, mycol){
 }
 
 dt <- read.table("DNM_simulations_FDR.txt")
-categ.names <- dt[,1]
+categ.names <- factor(dt[,1], levels=c(18.5, 11.6,6,2.7))
 dt <- as.matrix(dt[,2:dim(dt)[2]])
 d <- c(dt[1,], dt[2,], dt[3,], dt[4,])
 categ <- rep(categ.names,each= dim(dt)[2])
 categ <- as.factor(categ)
 df <- data.frame(categ=categ,d=d)
-
 myboxplot(d~categ, df,mycol=c('#d7191c','#fdae61','#abdda4','#2b83ba'))
 ```

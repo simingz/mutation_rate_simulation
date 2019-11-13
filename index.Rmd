@@ -13,4 +13,4 @@ Some simulations for modeling mutation rate
 
 * [FDR control](FDR_boxplot.html)
 
-* [SMASH](smarh_mr.html)
+* [SMASH](smash_mr.html)
