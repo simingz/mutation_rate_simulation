@@ -1,0 +1,16 @@
+---
+title: "Mutation rate simulations"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Some simulations for modeling mutation rate
+
+* [Overdispersion](para_estimation.html)
+
+* [FDR control](FDR_boxplot.html)
+
+* [SMASH](smarh_mr.html)

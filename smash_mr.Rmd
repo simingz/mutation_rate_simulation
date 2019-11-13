@@ -63,3 +63,11 @@ lines(mu.est, col = "salmon", lwd=1.5)
 ```
 
 Here, green is the real parameter and data. red is the esitmated mean by smash.
+
+# Apply to real data
+We use 20kb window size around region chr20, 63400000.
+
+```{r 20kb}
+
+
+```
