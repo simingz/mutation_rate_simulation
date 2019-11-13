@@ -65,10 +65,14 @@ lines(mu.est, col = "salmon", lwd=1.5)
 Here, green is the real parameter and data. red is the esitmated mean by smash.
 
 # Apply to real data
-We use 20kb window size around region chr20, 63400000.
+We use 20kb window size around region KCNQ2 (chr20:62,037,542).
 
-```{r 20kb}
+```{r realdata}
 dat <- read.table("table.ASCWGS_20180504.WGS1902_hg19_controls_SNV_remove_recurrent_mutation.20kwindow.csv")
-dat0 <- dat[dat$chr=="chr20" & dat$start < 63400000 , ]
-
+dat0 <- dat[dat$chr=="chr20" &  dat$start > 62037542 - 6e6 & dat$start < 62037542 + 6e6, ]
+# Run smash.
+mu.est = smash(dat0$obs, "poiss")
+plot(dat0$start/1e6, dat0$obs, type = "l", col=NA, lwd=1.5, ylab= "# mutations/window", xlab = "Genomic position (Mb)", ylim=c(0,max(dat0$obs)))
+points(dat0$start/1e6, dat0$obs, col="darkgreen", cex=0.2)
+lines(dat0$start/1e6, mu.est, col = "salmon", lwd=1.5)
 ```
