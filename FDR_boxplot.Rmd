@@ -1,0 +1,36 @@
+---
+title: "Box plot -FDR"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Boxplot
+`DNM_simulations_FDR.txt` has four rows: each row corresponds to alpha value you estimated from overdispersion analysis (the first column). The rest (20 numbers per row) are FDRs from simulations. You don’t have to know what they are: but basically I show that with overdispersion, one could have inflated FDR in analysis of de novo mutation data.
+What I need: box plot with four columns, each corresponding to a value of alpha, and the box the distribution of FDRs.
+
+```{r boxplot}
+myboxplot <- function(form, data, mycol){
+  library(Hmisc)
+  pointcolor <- adjustcolor(mycol,alpha.f = 0.3)
+  a <- boxplot(form, data=data, outline=FALSE, lty=1, staplewex=0, boxwex=0.7, boxlwd=1.5, medlwd=1.5, col=NA, border=mycol,bty="n", frame.plot=F, xaxt='n')
+  axis(side=1, labels=a$names, col.ticks = 0, at= 1:length(a$names),col=NA)
+  minor.tick(nx = 1, ny = 2)
+  abline(h=axTicks(2),lty=3,lwd=1,col="grey")
+  abline(h=axTicks(2)[1:length(axTicks(2))]+(axTicks(2)[2]-axTicks(2)[1])/2,lty=3,lwd=1,col="grey")
+  stripchart(form, data=data, vertical = TRUE, method = "jitter", add = T, pch = 19, col = pointcolor, cex=0.5)
+  boxplot(form, data=data,add=T,col=NA,outline=FALSE, lty=1, staplewex=0, boxwex=0.7, boxlwd=1.5, medlwd=1.5,border=mycol, xaxt="n", yaxt="n",bty='n', frame.plot=F)
+}
+
+dt <- read.table("DNM_simulations_FDR.txt")
+categ.names <- dt[,1]
+dt <- as.matrix(dt[,2:dim(dt)[2]])
+d <- c(dt[1,], dt[2,], dt[3,], dt[4,])
+categ <- rep(categ.names,each= dim(dt)[2])
+categ <- as.factor(categ)
+df <- data.frame(categ=categ,d=d)
+
+myboxplot(d~categ, df,mycol=c('#d7191c','#fdae61','#abdda4','#2b83ba'))
+```

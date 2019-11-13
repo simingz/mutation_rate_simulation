@@ -1,0 +1,108 @@
+---
+title: "Estimate parameter"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Functions
+```{r functions}
+ll <- function(g.alpha, g.beta, x, y){
+  # x is the vector of expected rate
+  # y is the vector of observed rate
+  # g.alpha is the alpha parameter in gamma distribution
+  # g.beta is the beta parameter in gamma distribution
+  g.alpha1 <- exp(g.alpha)
+  g.beta1 <- exp(g.beta)
+  sum(dnbinom(y, g.beta1, g.alpha1/(g.alpha1+x), log = T))
+}
+
+ll2 <- function(alpha,x,y){
+  ll(alpha,alpha,x,y)
+}
+
+para_est <- function(initv,dat){
+  # Try a series of initial values
+  resv <- rep(NA,length(initv))
+  for (i in 1:length(initv)){
+    init <- initv[i]
+    res <- optim(exp(log(init)),ll2,x=dat$exp,y=dat$obs, method="BFGS",control=list(fnscale=-1))
+    resv[i] <- exp(res$par)
+  }
+  print(sort(resv))
+  return(median(resv))
+}
+
+plot_gamma <- function(g.alpha,g.beta, col="salmon", main= NULL){
+  g.alpha <- round(g.alpha,1)
+  g.beta <- round(g.beta,1)
+  if (is.null(main)) {
+    plot(seq(0,5,0.01),dgamma(seq(0,5,0.01),g.alpha,g.beta),col="white",ylab="",xlab="",main=paste0("Probability distribution of Gamma(",g.alpha,",",g.beta,")"),bty = "n",las = 1)
+  } else {
+    plot(seq(0,5,0.01),dgamma(seq(0,5,0.01),g.alpha,g.beta),col="white",ylab="",xlab="", main = main, bty = "n",las = 1)
+  }
+ lines(seq(0,5,0.01),dgamma(seq(0,5,0.01),g.alpha,g.beta), col=col,lwd=2)
+ grid()
+}
+```
+## Results for 5K window
+```{r 5K}
+initv <- seq(1,15,2)
+dat <- read.table("table.ASCWGS_20180504.WGS1902_hg19_controls_SNV_remove_recurrent_mutation.ExpObsVar.bed.bed.add.5k")
+colnames(dat) <-  c("chr", "start", "end", "obs", "exp")
+dat <- dat[complete.cases(dat),]
+alphahat.5k <- para_est(initv,dat)
+print(paste0("Estimated alpha is: ", alphahat.5k))
+plot_gamma(alphahat.5k,alphahat.5k)
+```
+
+## Results for 10K window
+```{r 10K}
+initv <- seq(1,15,2)
+dat <- read.table("table.ASCWGS_20180504.WGS1902_hg19_controls_SNV_remove_recurrent_mutation.ExpObsVar.bed.bed.add.10k")
+colnames(dat) <-  c("chr", "start", "end", "obs", "exp")
+dat <- dat[complete.cases(dat),]
+alphahat.10k <- para_est(initv,dat)
+print(paste0("Estimated alpha is: ", alphahat.10k))
+plot_gamma(alphahat.10k,alphahat.10k)
+```
+
+## Results for 20K window
+```{r 20K}
+initv <- seq(1,15,2)
+dat <- read.table("table.ASCWGS_20180504.WGS1902_hg19_controls_SNV_remove_recurrent_mutation.20kwindow.csv")
+dat <- dat[complete.cases(dat),]
+alphahat.20k <- para_est(initv,dat)
+print(paste0("Estimated alpha is: ", alphahat.20k))
+plot_gamma(alphahat.20k,alphahat.20k)
+```
+
+## Results for 100K window
+```{r 100k}
+dat <- read.table("table.ASCWGS_20180504.WGS1902_hg19_controls_SNV_remove_recurrent_mutation.100kwindow.csv")
+dat <- dat[complete.cases(dat),]
+alphahat.100k <- para_est(initv,dat)
+print(paste0("Estimated alpha is: ", alphahat.100k))
+plot_gamma(alphahat.100k,alphahat.100k)
+```
+
+## Results for 500K window
+```{r 500k}
+dat <- read.table("table.ASCWGS_20180504.WGS1902_hg19_controls_SNV_remove_recurrent_mutation.500kwindow.csv")
+dat <- dat[complete.cases(dat),]
+alphahat.500k <- para_est(initv,dat)
+print(paste0("Estimated alpha is: ", alphahat.500k))
+plot_gamma(alphahat.500k,alphahat.500k)
+```
+
+## Combined gamma plots
+```{r combine}
+mycol=c('#d7191c','#fdae61','#abdda4','#2b83ba')
+par(mfrow=c(2,2),mar = c(2, 4, 2, 2) )
+plot_gamma(alphahat.5k,alphahat.5k,col=mycol[1], main=paste0("window size= 5kb, gamma = ", round (alphahat.5k, digit=1)))
+plot_gamma(alphahat.20k,alphahat.20k,col=mycol[2], main=paste0("window size= 20kb, gamma = ", round (alphahat.20k, digit=1)))
+plot_gamma(alphahat.100k,alphahat.100k,col=mycol[3], main=paste0("window size= 100kb, gamma = ", round (alphahat.100k, digit=1)))
+plot_gamma(alphahat.500k,alphahat.500k,col=mycol[4], main=paste0("window size= 500kb, gamma = ", round (alphahat.500k, digit=1)))
+```

@@ -1,0 +1,65 @@
+---
+title: "Smash for mutation rate"
+output: html_document
+---
+
+```{r setup}
+library(smashr)
+```
+Now we consider estimating a spatially structured mean $\mu$ = ($\mu_1$, . . . , $\mu_2$ ) from Poisson data:
+
+$$y_t ∼ Pois(\mu_t), (t = 1, . . . , T)$$
+# Simulation 1
+```{r smash1, fig.width = 10, fig.height=3}
+n = 1000
+t = 1:n
+spike.f = function(x) (5 * exp(-100 * round((x - 100)/10)^2) + 5 * exp(-100 * round((x - 400)/10)^2) + 5 * exp(-100 * round((x - 800)/10)^2) + 2 * exp(-100 * round((x - 500)/100)^2) 
+   )
+mu.s = spike.f(t)
+
+# POISSON CASE
+# ------------
+# Scale the signal to be non-zero and to have a low average intensity.
+mu.t = 1 + mu.s
+
+# Simulate an example dataset.
+set.seed(101)
+X.s = rpois(n, mu.t)
+
+# Run smash.
+mu.est = smash(X.s, "poiss")
+
+# Plot the estimated mean function (red) against the ground-truth (black).
+plot(mu.t, type = "l", col="darkgreen", lwd=1.5, ylab= "# mutations/window", xlab = "Genomic position (kb)", ylim=c(0,max(X.s)))
+points(X.s,col="darkgreen", cex=0.2)
+lines(mu.est, col = "salmon", lwd=1.5)
+```
+Here, green is the real parameter and data. red is the esitmated mean by smash.
+
+# Simulation 2
+```{r smash2, fig.width = 10, fig.height=3}
+n = 1000
+t = 1:n
+spike.f = function(x) (2 * exp(-100 * round((x - 100)/10)^2) + 2 * exp(-100 * round((x - 400)/10)^2) + 2 * exp(-100 * round((x - 800)/10)^2) + 0.5 * exp(-100 * round((x - 500)/100)^2) 
+   )
+mu.s = spike.f(t)
+
+# POISSON CASE
+# ------------
+# Scale the signal to be non-zero and to have a low average intensity.
+mu.t = 1 + mu.s
+
+# Simulate an example dataset.
+set.seed(99)
+X.s = rpois(n, mu.t)
+
+# Run smash.
+mu.est = smash(X.s, "poiss")
+
+# Plot the estimated mean function (red) against the ground-truth (black).
+plot(mu.t, type = "l", col="darkgreen", lwd=1.5, ylab= "# mutations/window", xlab = "Genomic position (kb)", ylim=c(0,max(X.s)))
+points(X.s,col="darkgreen", cex=0.2)
+lines(mu.est, col = "salmon", lwd=1.5)
+```
+
+Here, green is the real parameter and data. red is the esitmated mean by smash.
