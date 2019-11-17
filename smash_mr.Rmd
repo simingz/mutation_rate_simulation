@@ -50,24 +50,23 @@ mu.s = spike.f(t)
 mu.t = 1 + mu.s
 
 # Simulate an example dataset.
-for (i in 1:50){
-set.seed(i)
+set.seed(36)
 X.s = rpois(n, mu.t)
 
 # Run smash.
-mu.est = smash(X.s, "poiss")
+sm <- smash.poiss(X.s,post.var = TRUE)
 
 # Plot the estimated mean function (red) against the ground-truth (black).
-print(i)
-plot(mu.t, type = "l", col="darkgreen", lwd=1.5, ylab= "# mutations/window", xlab = "Genomic position (kb)", ylim=c(0,max(X.s)))
-points(X.s,col="darkgreen", cex=0.2)
-lines(mu.est, col = "salmon", lwd=1.5)}
+plot(mu.t, type = "l", col="#2171b5", lwd=1.5, ylab= "# mutations/window", xlab = "Genomic position (kb)", ylim=c(0,max(X.s)))
+points(X.s,col="#525252", cex=0.2)
+lines(sm$est, col = "salmon", lwd=1.5)
+lines(sm$est+2*sqrt(sm$var),col="#fee5d9",lwd=1.5)
+lines(sm$est-2*sqrt(sm$var),col="#fee5d9",lwd=1.5)
 ```
 
 Here, green is the real parameter and data. red is the esitmated mean by smash.
 
 # Apply to real data
-We use 20kb window size around region KCNQ2 (chr20:62,037,542).
 
 ```{r realdata}
 region <- head(read.table("table.100k.window.stand.diff.cutoff.4.topwindow.across.all.mutation.type.CSV", sep=",", skip=1, stringsAsFactors = F), n=5)
@@ -80,7 +79,29 @@ for (i in 1:nrow(region)){
   points(dat0$start/1e6, dat0$obs, col="darkgreen", cex=0.2)
   lines(dat0$start/1e6, mu.est, col = "salmon", lwd=1.5)
 }
-
-
 ```
-One of the region is interesting and we choose 
+One of the region is interesting and we choose it and overlay with John's data.
+
+This is chr16: 12600000
+```{r overlay}
+par(mfrow=c(2,1), mar=c(1,4,2,2))
+region <- head(read.table("table.100k.window.stand.diff.cutoff.4.topwindow.across.all.mutation.type.CSV", sep=",", skip=1, stringsAsFactors = F), n=5)
+dat <- read.table("table.ASCWGS_20180504.WGS1902_hg19_controls_SNV_remove_recurrent_mutation.20kwindow.csv")
+i <- 3
+dat0 <- dat[dat$chr==region[i,2] & dat$start > 8000000 & dat$start < 17980000 , ] # to overlay with John's data
+# Run smash.
+sm <- smash.poiss(dat0$obs, post.var = TRUE)
+plot(dat0$start/1e6 , dat0$obs, type = "l", col=NA, lwd=1.5, ylab= "# mutations/window", ylim=c(0,max(dat0$obs)), xlab=NA, xaxt='n')
+points(dat0$start/1e6 , dat0$obs, col="#525252", cex=0.3,pch=19)
+lines(dat0$start/1e6 , sm$est, col = "salmon", lwd=1.5)
+lines(dat0$start/1e6 , sm$est+2*sqrt(sm$var),col="#fee5d9",lwd=1.5)
+lines(dat0$start/1e6 , sm$est-2*sqrt(sm$var),col="#fee5d9",lwd=1.5)
+
+par(mar=c(4,4,0,2))
+dat2 <- read.table("table.chr16_8000000-18000000_20000_af1e-5_counts.bedgraph")
+counts <- dat2$V4
+pos <- (dat2$V2+ dat2$V3)/2
+sm <- smash.poiss(counts,post.var = TRUE)
+plot(pos/1e6,sm$est,xlab="Genomic position (Mb)",ylab="Observed counts",type="l",ylim=c(0,1.1*max(counts)),lwd=0.5)
+points(pos/1e6,counts, col="#525252", cex=0.3,pch=19)
+```
