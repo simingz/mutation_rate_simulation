@@ -101,7 +101,7 @@ par(mar=c(4,4,0,2))
 dat2 <- read.table("table.chr16_8000000-18000000_20000_af1e-5_counts.bedgraph")
 counts <- dat2$V4
 pos <- (dat2$V2+ dat2$V3)/2
-sm <- smash.poiss(counts,post.var = TRUE)
-plot(pos/1e6,sm$est,xlab="Genomic position (Mb)",ylab="Observed counts",type="l",ylim=c(0,1.1*max(counts)),lwd=0.5)
-points(pos/1e6,counts, col="#525252", cex=0.3,pch=19)
+sm <- smash.gaus(counts,joint = TRUE)
+plot(pos/1e6,sm$mu.res,xlab="Genomic position (Mb)",ylab="Observed counts",type="l",ylim=c(0,1.1*max(counts)),lwd=0.5)
+points(pos/1e6, counts, col="#525252", cex=0.3,pch=19)
 ```
